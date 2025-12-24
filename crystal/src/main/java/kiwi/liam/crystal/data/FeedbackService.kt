@@ -14,6 +14,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kiwi.liam.crystal.data.model.FeedbackModel
 import kiwi.liam.crystal.data.model.ResponseMessage
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 interface FeedbackService {
     suspend fun sendFeedback(feedback: FeedbackModel): Result<ResponseMessage>
@@ -31,7 +32,7 @@ internal class CrystalFeedbackService(
             exponentialDelay()
         }
         install(HttpTimeout) {
-            val timeout = 500.milliseconds.inWholeMilliseconds
+            val timeout = 5.seconds.inWholeMilliseconds
             socketTimeoutMillis = timeout
             requestTimeoutMillis = timeout
         }
