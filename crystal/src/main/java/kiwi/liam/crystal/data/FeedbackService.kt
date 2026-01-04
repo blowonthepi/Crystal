@@ -48,6 +48,6 @@ internal class CrystalFeedbackService(
             setBody(feedback)
         }
 
-        return response.body()
+        return runCatching { response.body<ResponseMessage>() }
     }
 }
