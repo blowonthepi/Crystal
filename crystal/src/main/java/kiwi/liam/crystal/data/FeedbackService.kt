@@ -39,15 +39,19 @@ internal class CrystalFeedbackService(
     },
 ) : FeedbackService {
     override suspend fun sendFeedback(feedback: FeedbackModel): Result<ResponseMessage> {
-        val response = client.post {
-            url(host)
+        try {
+            val response = client.post {
+                url(host)
 
-            contentType(ContentType.Application.Json)
-            headers["x-api-key"] = apiKey
+                contentType(ContentType.Application.Json)
+                headers["x-api-key"] = apiKey
 
-            setBody(feedback)
+                setBody(feedback)
+            }
+
+            return runCatching { response.body<ResponseMessage>() }
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
-
-        return runCatching { response.body<ResponseMessage>() }
     }
 }
