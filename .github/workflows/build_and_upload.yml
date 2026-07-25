@@ -1,0 +1,47 @@
+name: build_and_upload
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'corretto'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew bundleRelease
+
+    - name: Sign Android release
+      uses: r0adkll/sign-android-release@v1.0.4
+      with:
+        # The directory to find your release to sign
+        releaseDirectory: app/build/outputs/bundle/release/app-release.aab
+        # The key used to sign your release in base64 encoded format
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        # The key alias
+        alias: ${{ secrets.ALIAS }}
+        # The password to the keystore
+        keyStorePassword: ${{ secrets.PASSWORD }}
+        # The password for the key
+        keyPassword: ${{ secrets.PASSWORD }}
+
+    - name: Upload Android Release to Play Store
+      uses: r0adkll/upload-google-play@v1.1.5
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
+        packageName: kiwi.liam.decisions
+        releaseFiles: ${{ env.SIGNED_RELEASE_FILES }}
+        tracks: "qa"
